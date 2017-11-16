@@ -1,12 +1,11 @@
 from scrapy.spiders import CrawlSpider,Rule
 from scrapy.linkextractors import LinkExtractor
-from scrapy.linkextractors.sgml import SgmlLinkExtractor
 from FinanceProject.items import FinanceprojectItem,FinanceMapItem
 from FinanceProject.log.FinanceLogger import FinanceLogger
+from FinanceProject.db.dao.ScrapyDao import main_handle_Qry,Content_Qry,Domin_Qry
+from FinanceProject.spiders.parse.wukong import wukong_json
 from scrapy.conf import settings
-from FinanceProject.db.dao.ScrapyDao import wacai_handle_Qry,Content_Qry,Domin_Qry
 import re
-
 
 #挖财网数据抓取
 @FinanceLogger()
@@ -59,13 +58,14 @@ def handle_wacai_response(response):
     itemMap['financeMap'] = financeMap
     # print(itemMap)
     yield itemMap
+
 @FinanceLogger()
 def handle_wacai(response):
     itemMap = FinanceMapItem()
     financeMap = []
     wacai_obj = {}
     if wacai_obj is None or len(wacai_obj) == 0 :
-        wacai_obj = wacai_handle_Qry([1,])
+        wacai_obj = main_handle_Qry([1,])
     RT_MAP = wacai_obj['RT']
     I_MAP  = wacai_obj['I']
     M_MAP  = wacai_obj['M']
@@ -175,7 +175,51 @@ class woCai_spider(CrawlSpider):
     # @FinanceLogger()
     def parse_item(self,response):
         self.logger.info(response)
-        return handle_wacai(response)
+        return handle_wacai_response(response)
+
+    @FinanceLogger()
+    def xiaoniu_item2(self,response):
+        itemMap = FinanceMapItem()
+        financeMap = []
+        xiaoniu_obj = {}
+        if xiaoniu_obj is None or len(xiaoniu_obj) == 0 :
+            xiaoniu_obj = main_handle_Qry([2,])
+        RT_MAP = xiaoniu_obj['RT']
+        I_MAP  = xiaoniu_obj['I']
+        if RT_MAP[0][7] is not None and RT_MAP[0][7] == 'css':
+            objs = response.css(RT_MAP[0][1])
+        else:
+            objs = response.xpath(RT_MAP[0][1])
+
+        for items in objs:
+            item = FinanceprojectItem()
+            item['from_url'] = [response.url,]
+            for part in I_MAP:
+                if part[0] == 'domain':
+                    domain_complie = re.compile(part[3])
+                    item['domain'] = [domain_complie.search(response.url).group(1),]
+                else:
+                    if part[7] is not None and part[7] == 'css':
+                        if part[3] is not None and part[3] != '':
+                            item[part[0]] = items.css(part[1]).re(r''+part[3])
+                            print("part == ",items.css(part[1]).extract())
+                        else:
+                            item[part[0]] = items.css(part[1]).extract()
+                    elif part[7] is not None and part[7] == 'str':
+                        item[part[0]] = part[2]
+                    else:
+                        if part[3] is not None and part[3] != '':
+                            item[part[0]] = items.xpath(part[1]).re(r''+part[3])
+                            print("part == ",items.xpath(part[1]))
+                        else:
+                            item[part[0]] = items.xpath(part[1]).extract()
+            financeMap.append(item)
+
+        itemMap['financeMap'] = financeMap
+        print('xiaoniu_item2 = ',itemMap)
+        yield itemMap
+
+
     @FinanceLogger()
     def xiaoniu_item(self,response):
         itemMap = FinanceMapItem()
@@ -183,11 +227,11 @@ class woCai_spider(CrawlSpider):
         financeMap = []
         xiaoniu_obj = {}
         if xiaoniu_obj is None or len(xiaoniu_obj) == 0 :
-            xiaoniu_obj = wacai_handle_Qry([2,])
+            xiaoniu_obj = main_handle_Qry([2,])
         RT_MAP = xiaoniu_obj['RT']
         I_MAP  = xiaoniu_obj['I']
         for items in response.xpath(RT_MAP[0][1]):
-            # print('items====',items.xpath("li/h1/div/text()").extract())
+            print('items====',items.css('.name').extract())
             item = FinanceprojectItem()
             item['from_url'] = [response.url,]
             for part in I_MAP:
@@ -206,7 +250,14 @@ class woCai_spider(CrawlSpider):
                     item[part[0]] = items.xpath(part[1]).extract()
             financeMap.append(item)
         itemMap['financeMap'] = financeMap
+        print('financeMap = ',financeMap)
         yield itemMap
+
+    @FinanceLogger()
+    def wukong_json(self,response):
+        pass
+
+
     @FinanceLogger()
     def wukong_item(self,response):
         itemMap = FinanceMapItem()
@@ -217,7 +268,9 @@ class woCai_spider(CrawlSpider):
             xiaoniu_obj = wacai_handle_Qry([3,])
         RT_MAP = xiaoniu_obj['RT']
         I_MAP  = xiaoniu_obj['I']
-        for items in response.xpath(RT_MAP[0][1]):
+        print("RT_MAP = ",RT_MAP[0][1])
+
+        for items in response.xpath("//div[@id='show']"):
             # print('items====',items.xpath("li/h1/div/text()").extract())
             item = FinanceprojectItem()
             item['from_url'] = [response.url,]
@@ -241,11 +294,11 @@ class woCai_spider(CrawlSpider):
         itemMap['financeMap'] = financeMap
         yield itemMap
 
-from scrapy.crawler import CrawlerProcess
-if __name__ == "__main__":
-    process = CrawlerProcess(settings)
-    spiders = woCai_spider()
-    process.crawl(spiders)
-    process.start()
+# from scrapy.crawler import CrawlerProcess
+# if __name__ == "__main__":
+#     process = CrawlerProcess(settings)
+#     spiders = woCai_spider()
+#     process.crawl(spiders)
+#     process.start()
 
 

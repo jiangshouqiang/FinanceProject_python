@@ -18,11 +18,32 @@ COLUMN_DEF,
 VAL_RE,
 COLUMN_FLAG,
 COL_MAP,
-COL_MAP_VAL
+COL_MAP_VAL,
+FUN_NAME,
+JRN_ID
 from SCRAPY_COLUMN_RE
 WHERE COLUMN_STS='1'
 AND
 CONTENT_ID = %s
+AND
+now_dt() BETWEEN EFF_DT AND EXP_DT
+'''
+
+QRY_CLOUMN_SET = '''
+SELECT
+COLUMN_NAME,
+COLUMN_RE,
+COLUMN_DEF,
+VAL_RE,
+COLUMN_FLAG,
+COL_MAP,
+COL_MAP_VAL,
+FUN_NAME,
+JRN_ID
+from SCRAPY_COLUMN_RE
+WHERE COLUMN_STS='1'
+AND
+JRN_START_ID = %s
 AND
 now_dt() BETWEEN EFF_DT AND EXP_DT
 '''
@@ -46,8 +67,26 @@ FROM SCRAPY_CONTENT
 WHERE CONTENT_STS='1'
 AND now_dt() BETWEEN CONTENT_START_DT AND CONTENT_END_DT
 '''
+
+QRY_CONTENT_RE = '''
+SELECT
+CONTENT_ID,
+CONTENT_URL,
+CONTENT_RE_URL,
+CONTENT_RE_ISFOLLOW,
+CONTENT_URL_FLAG,
+CONTENT_HANDLE_FUND
+FROM SCRAPY_CONTENT
+WHERE CONTENT_STS='1'
+AND DOMIN_ID = %s
+AND CONTENT_URL_FLAG = 'RE'
+AND now_dt() BETWEEN CONTENT_START_DT AND CONTENT_END_DT
+'''
+
+
 @FinanceLogger()
 def Scrapy_Update(val:[]):
+    print("financeMap = ",val['financeMap'])
     for val_map in val['financeMap']:
         part_val = []
         part_val.append(get_val(val_map.get('domain','')))
@@ -64,13 +103,23 @@ def Scrapy_Update(val:[]):
         part_val.append(get_val(val_map.get('pro_flag','')))
         part_val.append(get_val(val_map.get('from_url','')))
         part_val.append(get_val(val_map.get('process','')))
-        # print('item = ',part_val)
+        print('item = ',val_map.get('pro_cycle',''))
         Update(INSERT_CONTENT,part_val)
 @FinanceLogger()
 def Scrapy_Qry(val:[]):
     val = Query(QRY_SCRAPY_SET,val)
     return val
+@FinanceLogger()
+def Scrapy_sub_cloumn(val:[]):
+    val = Query(QRY_CLOUMN_SET,val)
+    return val
 
+@FinanceLogger()
+def Scrapy_content_re(val:[]):
+    val = Query(QRY_CONTENT_RE,val)
+    return val
+
+@FinanceLogger()
 def Domin_Qry():
 
     val = Query(QRY_DOMIN,[])
@@ -94,7 +143,7 @@ def Content_Qry():
     # print('content=',obj['RE'])
     return obj
 
-def wacai_handle_Qry(val:[]):
+def main_handle_Qry(val:[]):
     obj = {}
     val = Scrapy_Qry(val)
     RT = []
@@ -124,12 +173,13 @@ def wacai_handle_Qry(val:[]):
 # print(wacai_handle_Qry([2,]))
 @FinanceLogger()
 def get_val(val:[]):
-    if val is None or len(val) == 0 :
-        return ''
+    if not isinstance(val,list):
+        val = [val,]
+    if val is None  :
+        return []
     if len(val) > 0 :
         return val[0]
-    if '' == val :
-        return ''
+    return ''
 
 def load_scrapy():
     pass

@@ -14,7 +14,7 @@ HEIGHT = args.height
 OUTPUT = args.output
 
 # ascii_char = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
-ascii_char = list("爱恨爱恨爱恨爱恨爱恨爱恨爱爱恨爱恨爱恨爱恨爱恨爱恨爱爱恨爱恨爱恨爱恨爱恨爱恨爱爱恨爱恨爱恨爱恨爱恨爱恨爱,\"^`'. ")
+ascii_char = list(".............")
 def get_char(r,b,g,alpha = 256):
     if alpha == 0:
         return ' '

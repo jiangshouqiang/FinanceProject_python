@@ -12,6 +12,7 @@ cursor = conn.cursor()
 # val = cursor.fetchall()
 @FinanceLogger()
 def Update(sql,val):
+    print("INSERT = ",sql,val)
     cursor = conn.cursor()
     try:
         cursor.execute(sql,val)
@@ -25,7 +26,7 @@ def Query(sql:str,val:[]):
     try:
         cursor.execute(sql,val)
         val =  cursor.fetchall()
-        print("val = ",val)
+        # print("val = ",val)
         return val
     except:
         raise ConnectionResetError
@@ -37,5 +38,5 @@ def Qry_Domin(sql:str):
         # conn.close()
 #
 # SQL = 'INSERT INTO PYTHON (id) values (%s)'
-# val = ['1','2']
+# val = ['1']
 # Update(SQL,val)

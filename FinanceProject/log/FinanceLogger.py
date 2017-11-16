@@ -5,14 +5,14 @@ import logging.handlers
 import datetime
 import os
 import inspect
-import imp
 
 now = datetime.datetime.now()
 def get_variable():
     for va in inspect.stack() :
         for v in va:
             if inspect.isframe(v):
-                print("v == ",v.f_locals)
+                pass
+                # print("v == ",v.f_locals)
 
 def FinanceLogger(name=None):
     '''

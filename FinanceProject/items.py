@@ -11,8 +11,8 @@ from scrapy.item import Item,Field
 class FinanceprojectItem(Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    domain     =  Field() #域名
-    organ      =  Field() #机构标示
+    domain     = Field() #域名
+    organ      = Field() #机构标示
     fin_name   = Field() #理财产品名称
     pro_bate   = Field() #产品年化收益
     user_num   = Field() #投资用户数量

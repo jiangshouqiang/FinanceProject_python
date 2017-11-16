@@ -23,9 +23,21 @@ USER_AGENT='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (
 ROBOTSTXT_OBEY = True
 COOKIES_ENABLED = True
 #mysql数据库设置
+MYSQL_HOST = '127.0.0.1'
 MYSQL_USER = 'root'
 MYSQL_PWD  = 'jiangshouqiang'
 MYSQL_DB   = 'heritrex'
+
+# Scrapyjs
+DOWNLOADER_MIDDLEWARES = {
+   'scrapyjs.SplashMiddleware': 725,
+}
+DUPEFILTER_CLASS = 'scrapyjs.SplashAwareDupeFilter'
+SPLASH_URL = ''
+
+#redis
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -46,7 +58,7 @@ INFO = 20
 DEBUG = 10
 NOTSET = 0
 DOWNLOAD_DELAY = 2
-LOG_LEVEL=INFO
+LOG_LEVEL=ERROR
 LOG_FILE_DIR='/Users/jiang/Documents/log/scrapy_log/'
 
 # Disable cookies (enabled by default)

@@ -8,7 +8,8 @@ from FinanceProject.db.dao.ScrapyDao import Scrapy_Update
 
 class FinanceprojectPipeline(object):
     def process_item(self, item, spider):
-        if item is not None and len(item['financeMap'])>0 :
 
+        if item is not None and len(item['financeMap'])>0 :
+            # print("item ====== ",item)
             Scrapy_Update(item)
         return item
